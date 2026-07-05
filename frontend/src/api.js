@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api',
+ baseURL: 'https://finguard-6t63.onrender.com/api',
   timeout: 8000
 })
 

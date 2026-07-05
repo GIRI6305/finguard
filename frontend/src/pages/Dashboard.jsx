@@ -14,7 +14,7 @@ export default function Dashboard({ onLogout }) {
   const [lastUpdated, setLastUpdated] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [initialLoad, setInitialLoad] = useState(true)
-  const liveAlerts = useWebSocket('ws://localhost:8080/ws/alerts')
+  const liveAlerts = useWebSocket('wss://finguard-6t63.onrender.com/ws/alerts')
   const navigate = useNavigate()
 
   const username = localStorage.getItem('finguard_username') || ''
