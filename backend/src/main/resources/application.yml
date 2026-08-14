@@ -6,9 +6,9 @@ spring:
     name: finguard
 
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/finguard?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true}
-    username: ${DB_USERNAME:finguard}
-    password: ${DB_PASSWORD:finguard}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://gateway01.us-east-1.prod.aws.tidbcloud.com:4000/sys?sslMode=VERIFY_IDENTITY&enabledTLSProtocols=TLSv1.2,TLSv1.3}
+    username: ${SPRING_DATASOURCE_USERNAME:3T2gdZBxtztgLBY.root}
+    password: ${SPRING_DATASOURCE_PASSWORD:sSaWWynp6GGnEggd}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
