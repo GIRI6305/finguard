@@ -10,6 +10,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -31,25 +33,42 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
 
-                // IMPORTANT: allow browser CORS preflight
+                // Allow browser CORS preflight requests
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                 // Public authentication endpoints
-                .requestMatchers(
-                    "/api/auth/**"
-                ).permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
 
-                // Everything else requires authentication
+                // All other endpoints require authentication
                 .anyRequest().authenticated()
             );
 
         return http.build();
     }
-    @Bean
-public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-    return config.getAuthenticationManager();
-}
 
+    /**
+     * Provides the AuthenticationManager used by AuthService
+     * for login authentication.
+     */
+    @Bean
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration config) throws Exception {
+
+        return config.getAuthenticationManager();
+    }
+
+    /**
+     * Provides BCrypt password hashing for user registration
+     * and password verification during login.
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * Global CORS configuration for the deployed frontend.
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
@@ -58,6 +77,7 @@ public AuthenticationManager authenticationManager(AuthenticationConfiguration c
         configuration.setAllowedOrigins(
             Arrays.stream(allowedOrigins.split(","))
                 .map(String::trim)
+                .filter(origin -> !origin.isEmpty())
                 .toList()
         );
 
