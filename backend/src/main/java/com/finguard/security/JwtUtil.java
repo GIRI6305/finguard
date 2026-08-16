@@ -1,13 +1,16 @@
 package com.finguard.security;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+
+import javax.crypto.SecretKey;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
-import java.util.Date;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtil {
@@ -18,33 +21,92 @@ public class JwtUtil {
     @Value("${finguard.jwt.expiration-ms}")
     private long expirationMs;
 
+    /*
+     * Create signing key from configured secret.
+     *
+     * HS256 requires a sufficiently long secret.
+     */
     private SecretKey key() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+
+        return Keys.hmacShaKeyFor(
+                secret.getBytes(StandardCharsets.UTF_8)
+        );
     }
 
-    public String generateToken(String username, String role) {
+    /*
+     * Generate JWT.
+     */
+    public String generateToken(
+            String username,
+            String role) {
+
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + expirationMs);
+
+        Date expiry =
+                new Date(
+                        now.getTime() + expirationMs
+                );
 
         return Jwts.builder()
+
                 .subject(username)
-                .claim("role", role)
+
+                .claim(
+                        "role",
+                        role
+                )
+
                 .issuedAt(now)
+
                 .expiration(expiry)
-                .signWith(key(), SignatureAlgorithm.HS256)
+
+                .signWith(
+                        key(),
+                        SignatureAlgorithm.HS256
+                )
+
                 .compact();
     }
 
-    public String extractUsername(String token) {
-        return Jwts.parser().verifyWith(key()).build()
-                .parseSignedClaims(token).getPayload().getSubject();
+    /*
+     * Extract username from JWT.
+     */
+    public String extractUsername(
+            String token) {
+
+        return Jwts.parser()
+
+                .verifyWith(key())
+
+                .build()
+
+                .parseSignedClaims(token)
+
+                .getPayload()
+
+                .getSubject();
     }
 
-    public boolean isTokenValid(String token) {
+    /*
+     * Validate JWT signature and expiration.
+     */
+    public boolean isTokenValid(
+            String token) {
+
         try {
-            Jwts.parser().verifyWith(key()).build().parseSignedClaims(token);
+
+            Jwts.parser()
+
+                    .verifyWith(key())
+
+                    .build()
+
+                    .parseSignedClaims(token);
+
             return true;
+
         } catch (Exception e) {
+
             return false;
         }
     }
